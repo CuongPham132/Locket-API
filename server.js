@@ -1,29 +1,33 @@
 // server.js
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import connectDB from "./config/db.js";
 
-dotenv.config();
-const app = express();
-app.use(express.json());
-
-// Kết nối MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected successfully!"))
-  .catch(err => console.log("❌ MongoDB connection failed:", err));
-
-// Import routes
-import userRoutes from "./routes/userRoutes.js";
+// Import route
 import friendRoutes from "./routes/friendRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 
-// Route middleware
-app.use("/users", userRoutes);
-app.use("/friends", friendRoutes);
-app.use("/posts", postRoutes);
-app.use("/messages", messageRoutes);
+// Import middleware
+import { errorHandler } from "./middleware/errorHandler.js";
 
-// Chạy server
+dotenv.config();
+connectDB();
+
+const app = express();
+
+// Middleware để parse JSON
+app.use(express.json());
+
+// Routes
+app.use("/api/friends", friendRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
+
+// Middleware xử lý lỗi toàn cục
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
